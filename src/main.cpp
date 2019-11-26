@@ -16,8 +16,47 @@ char daysOfTheWeek[7][12] = {"Sonntag", "Montag", "Dienstag", "Mittwoch", "Donne
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 
 unsigned long laufzeit = 0;
+byte screen_number = 1;
+
+byte alarm_hour = 8;
+byte alarm_minute = 45;
+boolean alarm_active = false;
+
+
+OneButton buttonA(2, true);
+OneButton buttonB(3, true);
+
+void clickeditA() {
+  switch (screen_number) {
+    case 1:
+      screen_number = 2;
+      break;
+    case 2:
+      screen_number = 1;
+      break;
+    case 3:
+      alarm_hour++;
+      if (alarm_hour > 23) alarm_hour = 0;
+      break;
+    case 4:
+      alarm_minute++;
+      if (alarm_minute > 59) alarm_minute = 0;
+      break;
+  }
+}
+
+void clickeditB() {
+  if (screen_number >= 2) screen_number++;
+  if (screen_number > 4) screen_number = 2;
+}
 
 void setup() {
+  pinMode(2, INPUT_PULLUP); //Button A
+  pinMode(3, INPUT_PULLUP); //Button B
+
+  buttonA.attachClick(clickeditA);
+  buttonB.attachClick(clickeditB);
+
   Serial.begin(9600);
   delay(3000); // wait for console opening
 
@@ -25,11 +64,15 @@ void setup() {
     Serial.println("Could not find RTC");
     while (1);
   }
-  Serial.println("RTC found and connected!");
-  rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));
-  Serial.println("RTC time and date set!");
 
-  if(!display.begin(SSD1306_SWITCHCAPVCC, 0x3C)) { // Address 0x3D for 128x64
+  Serial.println("RTC found and connected!");
+
+  if (! rtc.lostPower()) {
+    rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));
+    Serial.println("RTC time and date set!");
+  }
+
+  if(!display.begin(SSD1306_SWITCHCAPVCC, 0x3C)) {
     Serial.println(F("SSD1306 allocation failed"));
     for(;;); // Don't proceed, loop forever
   }
@@ -44,6 +87,7 @@ void setup() {
 }
 
 void loop() {
+  buttonA.tick();
   // put your main code here, to run repeatedly:
   DateTime now = rtc.now();
   display.clearDisplay();
@@ -51,25 +95,55 @@ void loop() {
   display.setTextColor(SSD1306_WHITE);        // Draw white text
   display.setCursor(0,0);
 
-  display.print(now.year(), DEC);
-  display.print('/');
-  display.print(now.month(), DEC);
-  display.print('/');
-  display.println(now.day(), DEC);
-  display.println(daysOfTheWeek[now.dayOfTheWeek()]);
-  display.print(now.hour(), DEC);
-  display.print(':');
-  if (now.minute()<10) display.print("0");
-  display.print(now.minute(), DEC);
-  display.print(':');
-  if (now.second()<10) display.print("0");
-  display.print(now.second(), DEC);
-  display.println();
-  display.print("Temp: ");
-  display.print(rtc.getTemperature());
-  display.println(" C");
+  switch (screen_number) {
+    case 1:
+      display.println("Current Time & Date");
+      display.print(now.year(), DEC);
+      display.print('/');
+      display.print(now.month(), DEC);
+      display.print('/');
+      display.println(now.day(), DEC);
+      display.println(daysOfTheWeek[now.dayOfTheWeek()]);
+      if (now.hour()<10) display.print("0");
+      display.print(now.hour(), DEC);
+      display.print(':');
+      if (now.minute()<10) display.print("0");
+      display.print(now.minute(), DEC);
+      display.print(':');
+      if (now.second()<10) display.print("0");
+      display.print(now.second(), DEC);
+      display.println();
+      break;
+    case 2:
+      display.println("Alarm Time");
+      if (alarm_hour<10) display.print("0");
+      display.print(alarm_hour, DEC);
+      display.print(':');
+      if (alarm_minute<10) display.print("0");
+      display.println(alarm_minute, DEC);
+      break;
+    case 3:
+      display.println("Set Alarm Hour (0..23)");
+      // if (alarm_hour<10) display.print("0");
+      // display.print(alarm_hour, DEC);
+      // display.print(':');
+      // if (alarm_minute<10) display.print("0");
+      // display.println(alarm_minute, DEC);
+      break;
+    case 4:
+      display.println("Set Alarm Minute (0..59)");
+      // if (alarm_hour<10) display.print("0");
+      // display.print(alarm_hour, DEC);
+      // display.print(':');
+      // if (alarm_minute<10) display.print("0");
+      // display.println(alarm_minute, DEC);
+      break;
+  }
+  display.print("Screen: ");
+  if (millis() % 1500 < 1000) display.println(screen_number);
+  else display.println("_");
 
-  if (millis() - 1000 > laufzeit) {
+  if (millis() - 500 > laufzeit) {
     display.display();
     laufzeit = millis();
   }
