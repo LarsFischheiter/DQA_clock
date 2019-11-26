@@ -65,11 +65,14 @@ void setup() {
     while (1);
   }
 
-  // Serial.println("RTC found and connected!");
-  // rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));
-  // Serial.println("RTC time and date set!");
+  Serial.println("RTC found and connected!");
 
-  if(!display.begin(SSD1306_SWITCHCAPVCC, 0x3C)) { // Address 0x3D for 128x64
+  if (! rtc.lostPower()) {
+    rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));
+    Serial.println("RTC time and date set!");
+  }
+
+  if(!display.begin(SSD1306_SWITCHCAPVCC, 0x3C)) {
     Serial.println(F("SSD1306 allocation failed"));
     for(;;); // Don't proceed, loop forever
   }
