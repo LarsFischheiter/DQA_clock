@@ -9,6 +9,9 @@
 RTC_DS3231 rtc;
 char daysOfTheWeek[7][12] = {"Sonntag", "Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag"};
 
+#define Taste_A 2
+#define Taste_B 3
+
 #define SCREEN_WIDTH 128 // OLED display width, in pixels
 #define SCREEN_HEIGHT 64 // OLED display height, in pixels
 // Declaration for an SSD1306 display connected to I2C (SDA, SCL pins)
@@ -23,8 +26,8 @@ byte alarm_minute = 45;
 boolean alarm_active = false;
 
 
-OneButton buttonA(2, true);
-OneButton buttonB(3, true);
+OneButton buttonA(Taste_A, true);
+OneButton buttonB(Taste_B, true);
 
 void clickeditA() {
   switch (screen_number) {
@@ -51,8 +54,8 @@ void clickeditB() {
 }
 
 void setup() {
-  pinMode(2, INPUT_PULLUP); //Button A
-  pinMode(3, INPUT_PULLUP); //Button B
+  pinMode(Taste_A, INPUT_PULLUP); //Button A
+  pinMode(Taste_B, INPUT_PULLUP); //Button B
 
   buttonA.attachClick(clickeditA);
   buttonB.attachClick(clickeditB);
@@ -84,7 +87,7 @@ void setup() {
 
   // Clear the buffer
   display.clearDisplay();
-  display.setTextSize(1);
+  display.setTextSize(1);             // Normal 1:1 pixel scale
   display.setTextColor(SSD1306_WHITE);
 }
 
@@ -124,7 +127,8 @@ void loop() {
       display.println(alarm_minute, DEC);
       break;
     case 3:
-      display.println("Set Alarm Hour (0..23)");
+      display.println("Set Alarm Hour");
+      display.println("To set press Button A");
       display.print("Hour: ");
       if (millis() % 1500 < 1000) {
         if (alarm_hour<10) display.print("0");
@@ -132,7 +136,8 @@ void loop() {
       } else display.println("__");
       break;
     case 4:
-      display.println("Set Alarm Minute (0..59)");
+      display.println("Set Alarm Minute");
+      display.println("To set press Button A");
       display.print("Minute: ");
       if (millis() % 1500 < 1000) {
         if (alarm_minute<10) display.print("0");
@@ -140,12 +145,12 @@ void loop() {
       } else display.println("__");
       break;
   }
+
   display.print("Screen: ");
   display.println(screen_number);
 
-  if (millis() - 500 > laufzeit) {
+  if (millis() - 250 > laufzeit) {
     display.display();
     laufzeit = millis();
   }
-
 }
