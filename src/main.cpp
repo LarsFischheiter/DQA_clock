@@ -84,15 +84,16 @@ void setup() {
 
   // Clear the buffer
   display.clearDisplay();
+  display.setTextSize(1);
+  display.setTextColor(SSD1306_WHITE);
 }
 
 void loop() {
   buttonA.tick();
+  buttonB.tick();
   // put your main code here, to run repeatedly:
   DateTime now = rtc.now();
   display.clearDisplay();
-  display.setTextSize(1);             // Normal 1:1 pixel scale
-  display.setTextColor(SSD1306_WHITE);        // Draw white text
   display.setCursor(0,0);
 
   switch (screen_number) {
@@ -124,24 +125,23 @@ void loop() {
       break;
     case 3:
       display.println("Set Alarm Hour (0..23)");
-      // if (alarm_hour<10) display.print("0");
-      // display.print(alarm_hour, DEC);
-      // display.print(':');
-      // if (alarm_minute<10) display.print("0");
-      // display.println(alarm_minute, DEC);
+      display.print("Hour: ");
+      if (millis() % 1500 < 1000) {
+        if (alarm_hour<10) display.print("0");
+        display.println(alarm_hour);
+      } else display.println("__");
       break;
     case 4:
       display.println("Set Alarm Minute (0..59)");
-      // if (alarm_hour<10) display.print("0");
-      // display.print(alarm_hour, DEC);
-      // display.print(':');
-      // if (alarm_minute<10) display.print("0");
-      // display.println(alarm_minute, DEC);
+      display.print("Minute: ");
+      if (millis() % 1500 < 1000) {
+        if (alarm_minute<10) display.print("0");
+        display.println(alarm_minute);
+      } else display.println("__");
       break;
   }
   display.print("Screen: ");
-  if (millis() % 1500 < 1000) display.println(screen_number);
-  else display.println("_");
+  display.println(screen_number);
 
   if (millis() - 500 > laufzeit) {
     display.display();
