@@ -133,8 +133,7 @@ void loop() {
       if (millis() % 1500 < 1000) {
         if (alarm_hour<10) display.print("0");
         display.println(alarm_hour);
-      } else
-        display.println("__");
+      } else display.println("__");
       break;
     case 4:
       display.println("Set Alarm Minute");
@@ -143,8 +142,7 @@ void loop() {
       if (millis() % 1500 < 1000) {
         if (alarm_minute<10) display.print("0");
         display.println(alarm_minute);
-      } else
-        display.println("__");
+      } else display.println("__");
       break;
   }
 
@@ -155,5 +153,4 @@ void loop() {
     display.display();
     laufzeit = millis();
   }
-
 }
